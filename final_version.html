@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Das Geheime Labor - Mathe Escape Room</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #e94560;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(233, 69, 96, 0.1);
+            border-radius: 15px;
+            border: 2px solid #e94560;
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #e94560;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #e94560; }
+            to { text-shadow: 0 0 20px #e94560, 0 0 30px #e94560; }
+        }
+
+	.header-image {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border-radius: 10px;
+            border: 2px solid #e94560;
+            margin-top: 20px;
+        }
+
+
+
+        .team-setup {
+            background: rgba(15, 52, 96, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #0f3460;
+        }
+
+        .game-area {
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(233, 69, 96, 0.2);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .challenge {
+            background: rgba(22, 33, 62, 0.8);
+            border: 2px solid #16213e;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .challenge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(233, 69, 96, 0.1), transparent);
+            animation: scan 3s infinite;
+        }
+
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .challenge.active {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .challenge h2 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+
+        .story-text {
+            background: rgba(233, 69, 96, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e94560;
+            font-style: italic;
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #16213e;
+            border-radius: 8px;
+            background: rgba(26, 26, 46, 0.8);
+            color: #e94560;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .hint-btn {
+            background: linear-gradient(135deg, #ffa726, #ff9800);
+        }
+
+        .hint-btn:disabled {
+            background: linear-gradient(135deg, #666, #888);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .feedback.show {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .feedback.correct {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4caf50;
+            color: #4caf50;
+        }
+
+        .feedback.incorrect {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid #f44336;
+            color: #f44336;
+        }
+
+        .formula-display {
+            background: rgba(233, 69, 96, 0.1);
+            border: 2px dashed #e94560;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.5em;
+            font-family: 'Times New Roman', serif;
+            margin: 15px 0;
+            border-radius: 10px;
+        }
+
+        .visual-pattern {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .pattern-item {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #16213e;
+            border-radius: 8px;
+            background: rgba(22, 33, 62, 0.5);
+        }
+
+        .success-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #e94560;
+            animation: confetti-fall 3s linear infinite;
+            z-index: 3000;
+            pointer-events: none;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-10px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(calc(100vh + 10px)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(233, 69, 96, 0.9);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+        }
+
+        .lab-equipment {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .equipment-item {
+            text-align: center;
+            padding: 15px;
+            border: 2px solid #16213e;
+            border-radius: 10px;
+            background: rgba(22, 33, 62, 0.3);
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .equipment-item:hover {
+            border-color: #e94560;
+            transform: scale(1.05);
+        }
+
+        .equipment-item.unlocked {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+
+        /* Tipp-Overlay Styles */
+        .hint-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hint-box {
+            background: rgba(22, 33, 62, 0.95);
+            border: 2px solid #e94560;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 20px;
+            box-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
+            position: relative;
+        }
+
+        .hint-box h3 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .hint-box p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .close-hint-btn {
+            background: linear-gradient(135deg, #4caf50, #8bc34a);
+            display: block;
+            margin: 20px auto 0;
+        }
+
+        .rectangular-array {
+            display: grid;
+            gap: 3px;
+            margin: 10px auto;
+            justify-content: center;
+            max-width: 200px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #e94560;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #e94560;
+        }
+
+        .cost-table {
+            background: rgba(15, 52, 96, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #16213e;
+        }
+
+        .cost-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .cost-table th, .cost-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #16213e;
+        }
+
+        .cost-table th {
+            background: rgba(233, 69, 96, 0.2);
+            color: #ff6b6b;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .visual-pattern {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hint-box {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            .button-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="timer" id="timer">40:00</div>
+    
+    <!-- Tipp-Overlay -->
+    <div class="hint-overlay" id="hintOverlay">
+        <div class="hint-box">
+            <h3>Tipp</h3>
+            <div id="hintContent"></div>
+            <button class="btn close-hint-btn" onclick="closeHint()">Tipp schließen</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Das Geheime Labor</h1>
+            <p>Professor Math hat den Code für seinen Computer vergessen! Löse die mathematischen Rätsel und hilf Professor Math dabei, den Code zu knacken!</p>
+
+	<img src="Laborbild.jpeg" alt="Ein Bild des geheimen Labors von Professor 	Math" class="header-image">
+        </div>
+
+        <div class="team-setup" id="teamSetup">
+            <h2>Team-Aufstellung</h2>
+            <div class="input-group">
+                <label for="teamName">Team-Name:</label>
+                <input type="text" id="teamName" placeholder="Gebt eurem Team einen coolen Namen...">
+            </div>
+            
+                        
+            <button class="btn" onclick="startGame()">Labor betreten!</button>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="lab-equipment" id="labEquipment">
+                <div class="equipment-item" data-challenge="1">
+                    <div style="font-size: 2em;">⚖️</div>
+                    <div>Waage</div>
+                    <div style="font-size: 0.8em;">Mischprotokoll</div>
+                </div>
+                <div class="equipment-item" data-challenge="2">
+                    <div style="font-size: 2em;">⚗️</div>
+                    <div>Reagenzglas</div>
+                    <div style="font-size: 0.8em;">Wachsende Kristalle</div>
+                </div>
+                <div class="equipment-item" data-challenge="3">
+                    <div style="font-size: 2em;">🧮</div>
+                    <div>Taschenrechner</div>
+                    <div style="font-size: 0.8em;">Kosten berechnen</div>
+                </div>
+                <div class="equipment-item" data-challenge="4">
+                    <div style="font-size: 2em;">🔬</div>
+                    <div>Mikroskop</div>
+                    <div style="font-size: 0.8em;">Rechteckige Arrays</div>
+                </div>
+                <div class="equipment-item" data-challenge="5">
+                    <div style="font-size: 2em;">📊</div>
+                    <div>Scanner</div>
+                    <div style="font-size: 0.8em;">Zahlenfolgen</div>
+                </div>
+                <div class="equipment-item" data-challenge="6">
+                    <div style="font-size: 2em;">🎯</div>
+                    <div>Computer</div>
+                    <div style="font-size: 0.8em;">Finale Lösung</div>
+                </div>
+            </div>
+
+            <!-- Challenge 1: Mischprotokoll -->
+            <div class="challenge" id="challenge1">
+                <h2>⚖️ Aufgabe 1: Das Mischprotokoll</h2>
+                <div class="story-text">
+                    Professor Math hat ein geheimes Mischprotokoll hinterlassen! Verschiedene Substanzen werden gemischt. Die Kosten hängen von den Mengen ab. Könnt ihr den Term für die Gesamtkosten K der Mischung aufstellen?
+                </div>
+
+                <div class="cost-table">
+                    <table>
+                        <tr>
+                            <th>Substanz</th>
+                            <th>Kosten pro ml</th>
+                            <th>Variable</th>
+                        </tr>
+                        <tr>
+                            <td>🧪 Substanz A</td>
+                            <td>3€/ml</td>
+                            <td>a ml</td>
+                        </tr>
+                        <tr>
+                            <td>⚗️ Substanz B</td>
+                            <td>1,50€/ml</td>
+                            <td>b ml</td>
+                        </tr>
+                        <tr>
+                            <td>🔬 Geräteeinrichtung</td>
+                            <td>15€</td>
+                            <td>(Fixkosten)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="input-group">
+                    <label>a) Stelle einen Term für die Gesamtkosten K der Mischung auf:</label>
+                    <input type="text" id="mixingCost" placeholder="">
+                </div>
+
+                <div class="input-group">
+                    <label>b) Berechne die Kosten für eine Mischung mit a = 50 ml und b = 70 ml:</label>
+                    <input type="number" id="mixingTotal" placeholder="Kosten in €">
+                </div>
+
+                <div class="button-container">
+                    <button class="btn" onclick="checkAnswer(1)">Protokoll prüfen</button>
+                    <button class="btn hint-btn" id="hint1-1" onclick="showHint(1, 1)" disabled>💡 Tipp 1 (2 min)</button>
+                    <button class="btn hint-btn" id="hint1-2" onclick="showHint(1, 2)" disabled>💡 Tipp 2 (4 min)</button>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </div>
+
+            <!-- Challenge 2: Wachsende Kristallsubstanz -->
+            <div class="challenge" id="challenge2">
+                <h2>⚗️ Aufgabe 2: Die wachsende Kristallsubstanz</h2>
+                <div class="story-text">
+                    Professor Math züchtet eine besondere Kristallsubstanz! Diese wächst jeden Tag um die gleiche Anzahl neuer Kristallteilchen. Beobachtet das Wachstumsmuster und findet den mathematischen Zusammenhang!
+                </div>
+
+                <div class="visual-pattern">
+                    <div class="pattern-item">
+                        <div><strong>Tag 1:</strong></div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 12px); gap: 3px; justify-content: center; margin: 10px 0;">
+                            <div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div>
+                            <div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div>
+                        </div>
+                        <div>4 Kristallteilchen</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div><strong>Tag 2:</strong></div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 12px); gap: 3px; justify-content: center; margin: 10px 0;">
+                            <div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div>
+                            <div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div>
+                            <div></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div></div>
+                        </div>
+                        <div>7 Kristallteilchen</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div><strong>Tag 3:</strong></div>
+                        <div style="display: grid; grid-template-columns: repeat(4, 12px); gap: 3px; justify-content: center; margin: 10px 0;">
+                            <div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div>
+                            <div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div>
+                            <div></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div></div>
+                        </div>
+                        <div>10 Kristallteilchen</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div><strong>Tag 4:</strong></div>
+                        <div style="display: grid; grid-template-columns: repeat(5, 12px); gap: 3px; justify-content: center; margin: 10px 0;">
+                            <div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div>
+                            <div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div>
+                            <div></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div class="dot" style="background: #40e0d0; box-shadow: 0 0 8px #40e0d0;"></div><div></div>
+                        </div>
+                        <div>13 Kristallteilchen</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>a) Welcher Term beschreibt die Anzahl der Kristallteilchen an Tag n?</label>
+                    <input type="text" id="crystalTerm" placeholder="">
+                </div>
+
+                <div class="input-group">
+                    <label>b) Wie viele Kristallteilchen gibt es an Tag 6?</label>
+                    <input type="number" id="crystalDay6" placeholder="Anzahl eingeben">
+                </div>
+
+                <div class="input-group">
+                    <label>c) An welchem Tag gibt es erstmals mehr als 25 Teilchen?</label>
+                    <input type="number" id="crystalDay25" placeholder="Tag eingeben">
+                </div>
+
+                <div class="button-container">
+                    <button class="btn" onclick="checkAnswer(2)">Kristall analysieren</button>
+                    <button class="btn hint-btn" id="hint2-1" onclick="showHint(2, 1)" disabled>💡 Tipp 1 (2 min)</button>
+                    <button class="btn hint-btn" id="hint2-2" onclick="showHint(2, 2)" disabled>💡 Tipp 2 (5 min)</button>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </div>
+
+            <!-- Challenge 3: Kostenberechnung -->
+            <div class="challenge" id="challenge3">
+                <h2>🧮 Aufgabe 3: Der Kosten-Computer</h2>
+                <div class="story-text">
+                    Professor Math plant eine Klassenfahrt für seine Schüler, die drei Tage dauert! Er braucht eure Hilfe bei der Kostenberechnung. Die Übernachtungskosten betragen insgesamt 150€ pro Schüler, der Skilift kostet für jeden Schüler 30€ pro Tag und es gibt noch zusätzliche fixe Kosten für die Busfahrt in Höhe von 2849€.
+                </div>
+
+                <div class="cost-table">
+                    <table>
+                        <tr>
+                            <th>Kostenart</th>
+                            <th>Betrag</th>
+                        </tr>
+                        <tr>
+                            <td>👥 Übernachtungskosten</td>
+                            <td>150€</td>
+                        </tr>
+                        <tr>
+                            <td>🎿 Skilift pro Tag</td>
+                            <td>30€</td>
+                        </tr>
+                        <tr>
+                            <td>🚌 Buskosten</td>
+                            <td>2849€</td>
+                        </tr>
+                        <tr>
+                            <td>👨‍👩‍👧‍👦 Anzahl Schüler</td>
+                            <td id="studentCount">76</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="input-group">
+                    <label>b) Stelle einen Term für die Gesamtkosten auf (mit s = Anzahl Schüler). Fasse soweit wie möglich zusammen:</label>
+                    <input type="text" id="costPerStudent" placeholder="">
+                </div>
+
+                <div class="input-group">
+                    <label>c) Berechne die Gesamtkosten bei 76 Schülern:</label>
+                    <input type="number" id="totalCost" placeholder="Gesamtkosten in €">
+                </div>
+
+                <div class="button-container">
+                    <button class="btn" onclick="checkAnswer(3)">Berechnung prüfen</button>
+                    <button class="btn hint-btn" id="hint3-1" onclick="showHint(3, 1)" disabled>💡 Tipp 1 (2 min)</button>
+                    <button class="btn hint-btn" id="hint3-2" onclick="showHint(3, 2)" disabled>💡 Tipp 2 (5 min)</button>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </div>
+
+            <!-- Challenge 4: Rechteckige Arrays -->
+            <div class="challenge" id="challenge4">
+                <h2>🔬 Aufgabe 4: Rechteckige Punktefelder</h2>
+                <div class="story-text">
+                    Das Mikroskop zeigt rechteckige Punktefelder von Bakterienkulturen. Jede Kultur wächst nach einem bestimmten Muster. Findet heraus, welcher Term die Anzahl der Bakterien beschreibt!
+                </div>
+
+                <div class="visual-pattern">
+                    <div class="pattern-item">
+                        <div><strong>Kultur 1 (n=1):</strong></div>
+                        <div class="rectangular-array" style="grid-template-columns: repeat(3, 12px);">
+                            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                        </div>
+                        <div>6 Bakterien</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div><strong>Kultur 2 (n=2):</strong></div>
+                        <div class="rectangular-array" style="grid-template-columns: repeat(4, 12px);">
+                            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                        </div>
+                        <div>12 Bakterien</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div><strong>Kultur 3 (n=3):</strong></div>
+                        <div class="rectangular-array" style="grid-template-columns: repeat(5, 12px);">
+                            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                        </div>
+                        <div>20 Bakterien</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Welcher Term beschreibt die Anzahl der Bakterien in Abhängigkeit von n?</label>
+                    <input type="text" id="bacterial1" placeholder="">
+                </div>
+
+                <div class="input-group">
+                    <label>Wie viele Bakterien hätte Kultur 5 (n=5)?</label>
+                    <input type="number" id="bacterial2" placeholder="Anzahl eingeben">
+                </div>
+
+                <div class="button-container">
+                    <button class="btn" onclick="checkAnswer(4)">Antwort prüfen</button>
+                    <button class="btn hint-btn" id="hint4-1" onclick="showHint(4, 1)" disabled>💡 Tipp 1 (2 min)</button>
+                    <button class="btn hint-btn" id="hint4-2" onclick="showHint(4, 2)" disabled>💡 Tipp 2 (5 min)</button>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </div>
+
+            <!-- Challenge 5: Zahlenfolgen -->
+            <div class="challenge" id="challenge5">
+                <h2>📊 Aufgabe 5: Der Zahlencode-Scanner</h2>
+                <div class="story-text">
+                    Der Scanner hat mysteriöse Zahlenfolgen entdeckt. Diese folgen mathematischen Gesetzmäßigkeiten. Findet die Terme, die diese Folgen beschreiben!
+                </div>
+
+                <div class="visual-pattern">
+                    <div class="pattern-item">
+                        <div><strong>Folge A:</strong></div>
+                        <div>Position 1: 5</div>
+                        <div>Position 2: 8</div>
+                        <div>Position 3: 11</div>
+                        <div>Position 4: 14</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div><strong>Folge B:</strong></div>
+                        <div>Position 1: 2</div>
+                        <div>Position 2: 4</div>
+                        <div>Position 3: 8</div>
+                        <div>Position 4: 16</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div><strong>Folge C:</strong></div>
+                        <div>Position 1: 1</div>
+                        <div>Position 2: 4</div>
+                        <div>Position 3: 9</div>
+                        <div>Position 4: 16</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Term für Folge A (n = Position):</label>
+                    <input type="text" id="sequenceA" placeholder="">
+                </div>
+                <div class="input-group">
+                    <label>Term für Folge B (n = Position):</label>
+                    <input type="text" id="sequenceB" placeholder="">
+                </div>
+                <div class="input-group">
+                    <label>Term für Folge C (n = Position):</label>
+                    <input type="text" id="sequenceC" placeholder="">
+                </div>
+
+                <div class="button-container">
+                    <button class="btn" onclick="checkAnswer(5)">Scanner aktivieren</button>
+                    <button class="btn hint-btn" id="hint5-1" onclick="showHint(5, 1)" disabled>💡 Tipp 1 (2 min)</button>
+                    <button class="btn hint-btn" id="hint5-2" onclick="showHint(5, 2)" disabled>💡 Tipp 2 (5 min)</button>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </div>
+
+            <!-- Challenge 6: Finale -->
+            <div class="challenge" id="challenge6">
+                <h2>🎯 Finale: Der Mastercode</h2>
+                <div class="story-text">
+                    Alle Geräte sind aktiviert! Jetzt müsst ihr den finalen Code eingeben. Verwendet eure vorherigen Lösungen, um die Ziffern des Codes zu berechnen. Der Code gibt den Zugang zum Computer frei!
+                </div>
+
+                <div class="formula-display" id="finalFormula">
+                    Der Code lautet: _ _ _ _ _
+                </div>
+
+                <div class="input-group">
+                    <label>1. Ziffer - Zehnerstelle der Gesamtkosten aus Aufgabe 1:</label>
+                    <input type="number" id="digit1" min="0" max="9" placeholder="">
+                </div>
+                <div class="input-group">
+                    <label>2. Ziffer - Einerstelle der Kristallteilchen aus Aufgabe 2 für Tag 6:</label>
+                    <input type="number" id="digit2" min="0" max="9" placeholder="">
+                </div>
+                <div class="input-group">
+                    <label>3. Ziffer - Tausenderstelle der Gesamtkosten aus Aufgabe 3:</label>
+                    <input type="number" id="digit3" min="0" max="9" placeholder="">
+                </div>
+                <div class="input-group">
+                    <label>4. Ziffer - Einerstelle der Bakterienanzahl bei der 5. Bakterienkultur aus Aufgabe 4:</label>
+                    <input type="number" id="digit4" min="0" max="9" placeholder="">
+                </div>
+                <div class="input-group">
+                    <label>5. Ziffer - Wert von Folge A aus Aufgabe 5 für Position 2:</label>
+                    <input type="number" id="digit5" min="1" max="9" placeholder="">
+                </div>
+
+                <div class="button-container">
+                    <button class="btn" onclick="checkAnswer(6)">🔓 Code testen!</button>
+                    <button class="btn hint-btn" id="hint6-1" onclick="showHint(6, 1)" disabled>💡 Tipp 1 (2 min)</button>
+                    <button class="btn hint-btn" id="hint6-2" onclick="showHint(6, 2)" disabled>💡 Tipp 2 (5 min)</button>
+                </div>
+                <div class="feedback" id="feedback6"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            teamName: '',
+            currentChallenge: 0,
+            completedChallenges: [],
+            startTime: null,
+            timeLeft: 40 * 60, // 40 minutes in seconds
+            challengeStartTimes: {}, // Track when each challenge was started
+            hints: {
+                1: {
+                    1: "Die Variablen sind in diesem Fall die Anzahl der ml der Substanz a und b. Vergiss aber nicht die Fixkosten!",
+                    2: "Term: K = 3a + 1,5b + 15. Setze nun die angegebenen Werte ein."
+                },
+                2: {
+                    1: "Schaut euch die Unterschiede zwischen den Tagen an: Tag 1→2: +3, Tag 2→3: +3, Tag 3→4: +3. Es kommen jeden Tag gleich viele dazu!",
+                    2: "Der Term ist 3n + 1."
+                },
+                3: {
+                    1: "Beachte, dass du die Kosten für den Skilift erst pro Tag angegeben sind und noch nicht für die ganze Reise.",
+                    2: "Term für die Gesamtkosten: 2849 + 240s"
+                },
+                4: {
+                    1: "Schaut euch die Abmessungen der Rechtecke genau an. Kultur 1: 3×2 = 6, Kultur 2: 4×3 = 12, Kultur 3: 5×4 = 20. Welches Muster erkennt ihr?",
+                    2: "Die Länge ist immer n+2. Was ist die Breite?."
+                },
+                5: {
+                    1: "Schaut euch die Unterschiede zwischen aufeinanderfolgenden Zahlen an. Bei Folge A: 5→8→11→14, also +3, +3, +3...!",
+                    2: "Folge A: 3n + 2 (3×1+2=5, 3×2+2=8...), Folge B: Könnten die angegebenen Zahlen Zweierpotenzen sein? , Folge C: Es handelt sich hier um Quadratzahlen."
+                },
+                6: {
+                    1: "Denkt an eure vorherigen Antworten zurück. Setzt die Werte in eure gefundenen Terme ein! Ihr könnt auch zu den anderen Antworten zurückgehen und nachsehen.",
+                    2: "Jetzt seid ihr auf euch alleine gestellt!"
+                }
+            }
+        };
+
+        // Timer functionality
+        function updateTimer() {
+            if (gameState.timeLeft <= 0) {
+                endGame(false);
+                return;
+            }
+            
+            const minutes = Math.floor(gameState.timeLeft / 60);
+            const seconds = gameState.timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            gameState.timeLeft--;
+        }
+
+        // Update hint buttons based on time elapsed for current challenge
+        function updateHintButtons() {
+            if (gameState.currentChallenge > 0 && gameState.challengeStartTimes[gameState.currentChallenge]) {
+                const timeElapsed = (Date.now() - gameState.challengeStartTimes[gameState.currentChallenge]) / 1000;
+                
+                const hint1Btn = document.getElementById(`hint${gameState.currentChallenge}-1`);
+                const hint2Btn = document.getElementById(`hint${gameState.currentChallenge}-2`);
+                
+                if (timeElapsed >= 120) { // 2 minutes
+                    hint1Btn.disabled = false;
+                    hint1Btn.textContent = '💡 Tipp 1';
+                }
+                
+                if (timeElapsed >= 300) { // 5 minutes
+                    hint2Btn.disabled = false;
+                    hint2Btn.textContent = '💡 Tipp 2';
+                }
+            }
+        }
+
+        function startGame() {
+            const teamName = document.getElementById('teamName').value;
+            if (!teamName.trim()) {
+                alert('Bitte gebt einen Teamnamen ein!');
+                return;
+            }
+            
+            gameState.teamName = teamName;
+            gameState.startTime = Date.now();
+            
+            document.getElementById('teamSetup').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
+            
+            // Start timer and hint update
+            setInterval(updateTimer, 1000);
+            setInterval(updateHintButtons, 1000);
+            
+            // Make first equipment item clickable
+            document.querySelector('[data-challenge="1"]').classList.add('unlocked');
+            
+            showMessage(`Willkommen im Labor, Team ${teamName}! Klickt auf das erste Gerät, um zu beginnen.`);
+        }
+
+        function showChallenge(challengeNumber) {
+            // Hide all challenges
+            document.querySelectorAll('.challenge').forEach(challenge => {
+                challenge.classList.remove('active');
+            });
+            
+            // Show selected challenge
+            document.getElementById(`challenge${challengeNumber}`).classList.add('active');
+            gameState.currentChallenge = challengeNumber;
+            
+            // Record challenge start time
+            if (!gameState.challengeStartTimes[challengeNumber]) {
+                gameState.challengeStartTimes[challengeNumber] = Date.now();
+            }
+            
+            // Update progress
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progress = (gameState.completedChallenges.length / 6) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        function checkAnswer(challengeNumber) {
+            let correct = false;
+            const feedback = document.getElementById(`feedback${challengeNumber}`);
+            
+            switch(challengeNumber) {
+                case 1:
+                    correct = checkChallenge1();
+                    break;
+                case 2:
+                    correct = checkChallenge2();
+                    break;
+                case 3:
+                    correct = checkChallenge3();
+                    break;
+                case 4:
+                    correct = checkChallenge4();
+                    break;
+                case 5:
+                    correct = checkChallenge5();
+                    break;
+                case 6:
+                    correct = checkChallenge6();
+                    break;
+            }
+            
+            showFeedback(feedback, correct, challengeNumber);
+        }
+
+        function normalizeTermExpression(term) {
+            return term.replace(/\s/g, '')
+                      .toLowerCase()
+			.replace(/€/g, '')
+                      .replace(/\*/g, '')
+                      .replace(/\^/g, '²')
+                      .replace(/\*\*/g, '²')
+                      .replace(/\(n\+2\)\(n\+1\)/g, 'n²+3n+2')
+                      .replace(/\(n\+1\)\(n\+2\)/g, 'n²+3n+2')
+                      .replace(/n\*n/g, 'n²')
+                      .replace(/1\.5/g, '1,5')
+                      .replace(/1\.50/g, '1,5');
+        }
+
+        function checkChallenge1() {
+            const mixCost = normalizeTermExpression(document.getElementById('mixingCost').value);
+            const mixTotal = parseInt(document.getElementById('mixingTotal').value);
+            
+            // Accept various equivalent forms: K = 3a + 1,5b + 15
+            const termCorrect = (mixCost.includes('3a') || mixCost.includes('3*a') || mixCost.includes('a*3') || mixCost.includes('a*3€') || mixCost.includes('3€*a') || 						mixCost.includes('3*a€')) && 
+                               (mixCost.includes('1,5b') || mixCost.includes('1,5b') || mixCost.includes('b*1,5') || mixCost.includes('b*1,5') || mixCost.includes('1,5€b') || 					mixCost.includes('1,5€*b') || mixCost.includes('1,5€ b')) && 
+                               (mixCost.includes('15') || mixCost.includes('15€'));
+            
+            // For a=50, b=70: 3×50 + 1.5×70 + 15 = 150 + 105 + 15 = 270
+            const totalCorrect = mixTotal === 270 ;
+            
+            return termCorrect && totalCorrect;
+        }
+
+        function checkChallenge2() {
+            const term = normalizeTermExpression(document.getElementById('crystalTerm').value);
+            const day6 = parseInt(document.getElementById('crystalDay6').value);
+            const day25 = parseInt(document.getElementById('crystalDay25').value);
+            
+            // Correct term: 3n + 1 (multiple forms accepted)
+            const termCorrect = term === '3*n+1' || term === '3 * n + 1' ||
+                               term === '1+3n' || term === '1+3*n' || term === '1 + 3 * n' || term === '1 + 3 n' || 
+                               term === '3n+1' || term === '1+3n';
+            
+            // For day 6: 3*6 + 1 = 19
+            const day6Correct = day6 === 19;
+            
+            // For more than 25: 3n + 1 > 25 → 3n > 24 → n > 8 → first day is n=9
+            const day25Correct = day25 === 9;
+            
+            return termCorrect && day6Correct && day25Correct;
+        }
+
+         function checkChallenge3() {
+    		const costTerm = normalizeTermExpression(document.getElementById('costPerStudent').value);
+    		const totalCost = parseInt(document.getElementById('totalCost').value);
+    
+    		// Accept only simplified/combined forms: 240s + 2849
+    		// No unsimplified forms like 150s+90s+2849 allowed
+    		const correctTerm = costTerm === '240s+2849' || 
+                       costTerm === '240s+2849' ||
+                       costTerm === '2849+240s' ||
+                       costTerm === '2849+240s' ||
+                       costTerm === 's240+2849' ||
+                       costTerm === '2849+s240';
+    
+    		// Total calculation: 76 students × 240 + 2849 = 18240 + 2849 = 21089
+    		const correctTotal = totalCost === 21089;
+    
+    	return correctTerm && correctTotal;
+	}
+
+        function checkChallenge4() {
+            const term = normalizeTermExpression(document.getElementById('bacterial1').value);
+            const prediction = parseInt(document.getElementById('bacterial2').value);
+            
+            // Multiple correct term representations for (n+2)(n+1) = n² + 3n + 2
+            const correctTerms = [
+                'n²+3n+2', 
+                'n²+3*n+2', 
+                '(n+2)(n+1)',
+		'(n+2)*(n+1)', 
+		'(n+1)*(n+2)',
+                '(n+1)(n+2)',
+                'n*n+3*n+2',
+                '3n+n²+2',
+                '2+3n+n²',
+                '2+n²+3n'
+            ];
+            
+            const termCorrect = correctTerms.some(ct => {
+                const normalizedCorrect = normalizeTermExpression(ct);
+                return term.includes(normalizedCorrect) || normalizedCorrect.includes(term);
+            });
+            
+            // For n=5: 5² + 3×5 + 2 = 25 + 15 + 2 = 42
+            const predictionCorrect = prediction === 42;
+            
+            return termCorrect && predictionCorrect;
+        }
+
+        function checkChallenge5() {
+            const seqA = normalizeTermExpression(document.getElementById('sequenceA').value);
+            const seqB = normalizeTermExpression(document.getElementById('sequenceB').value);
+            const seqC = normalizeTermExpression(document.getElementById('sequenceC').value);
+            
+            // Accept multiple equivalent forms
+            const correctA = seqA.includes('3n+2') || seqA.includes('3*n+2') || seqA.includes('2+3n');
+            const correctB = seqB.includes('2^n') || seqB.includes('2**n') || seqB.includes('2²') || seqB === '2^n';
+            const correctC = seqC.includes('n²') || seqC.includes('n^2') || seqC.includes('n*n');
+            
+            return correctA && correctB && correctC;
+        }
+
+        function checkChallenge6() {
+            const d1 = parseInt(document.getElementById('digit1').value);
+            const d2 = parseInt(document.getElementById('digit2').value);
+            const d3 = parseInt(document.getElementById('digit3').value);
+            const d4 = parseInt(document.getElementById('digit4').value);
+            const d5 = parseInt(document.getElementById('digit5').value);
+            
+            // Correct code: 79128
+            
+            
+            return d1 === 7 && d2 === 9 && d3 === 1 && d4 === 2 && d5 === 8;
+        }
+
+        function showFeedback(feedbackElement, correct, challengeNumber) {
+            feedbackElement.className = 'feedback show ' + (correct ? 'correct' : 'incorrect');
+            
+            if (correct) {
+                feedbackElement.innerHTML = '🎉 Richtig! Das Gerät ist jetzt aktiviert!';
+                
+                if (!gameState.completedChallenges.includes(challengeNumber)) {
+                    gameState.completedChallenges.push(challengeNumber);
+                    
+                    // Unlock next challenge
+                    if (challengeNumber < 6) {
+                        document.querySelector(`[data-challenge="${challengeNumber + 1}"]`).classList.add('unlocked');
+                    }
+                    
+                    // Mark current as completed
+                    document.querySelector(`[data-challenge="${challengeNumber}"]`).style.background = 'rgba(76, 175, 80, 0.3)';
+                    
+                    updateProgress();
+                    
+                    if (challengeNumber === 6) {
+                        endGame(true);
+                    } else {
+                        setTimeout(() => {
+                            showMessage('Klickt auf das nächste Gerät!');
+                        }, 2000);
+                    }
+                }
+            } else {
+                const encouragement = [
+                    'Nicht ganz richtig. Versucht es noch einmal!',
+                    'Fast! Überprüft eure Rechnung noch einmal.',
+                    'Hmm, das passt noch nicht. Nutzt den Tipp, wenn ihr Hilfe braucht!',
+                    'Nicht aufgeben! Jeder Fehler bringt euch der Lösung näher.'
+                ];
+                feedbackElement.innerHTML = encouragement[Math.floor(Math.random() * encouragement.length)];
+            }
+        }
+
+        function showHint(challengeNumber, hintNumber) {
+            const hintContent = gameState.hints[challengeNumber][hintNumber];
+            document.getElementById('hintContent').innerHTML = `<p>${hintContent}</p>`;
+            document.getElementById('hintOverlay').style.display = 'flex';
+        }
+
+        function closeHint() {
+            document.getElementById('hintOverlay').style.display = 'none';
+        }
+
+        function showMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                background: rgba(233, 69, 96, 0.95); color: white; padding: 20px;
+                border-radius: 10px; font-size: 1.2em; font-weight: bold;
+                z-index: 1000; text-align: center; max-width: 400px;
+                box-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
+            `;
+            messageDiv.textContent = message;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        function endGame(won) {
+            const elapsedTime = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const minutes = Math.floor(elapsedTime / 60);
+            const seconds = elapsedTime % 60;
+            
+            if (won) {
+                createConfetti();
+                showMessage(`🎉 GESCHAFFT! Team ${gameState.teamName} hat das Labor in ${minutes}:${seconds.toString().padStart(2, '0')} geöffnet!`);
+                document.getElementById('timer').style.background = 'linear-gradient(135deg, #4caf50, #8bc34a)';
+            } else {
+                showMessage(`⏰ Zeit abgelaufen! Aber ihr wart schon sehr nah dran, Team ${gameState.teamName}!`);
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#e94560', '#ff6b6b', '#4caf50', '#2196f3', '#ff9800', '#9c27b0', '#00bcd4', '#ffeb3b'];
+            
+            // Create many more confetti pieces for a spectacular effect
+            for (let i = 0; i < 150; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.style.position = 'fixed';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = '-20px';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.zIndex = '3000';
+                    confetti.style.pointerEvents = 'none';
+                    
+                    // Add some variety to confetti shapes and sizes
+                    const size = Math.random() * 8 + 6; // 6-14px
+                    confetti.style.width = size + 'px';
+                    confetti.style.height = size + 'px';
+                    
+                    // Some confetti pieces as rectangles instead of squares
+                    if (Math.random() > 0.5) {
+                        confetti.style.borderRadius = '0';
+                        confetti.style.width = (size * 0.6) + 'px';
+                        confetti.style.height = size + 'px';
+                    } else {
+                        confetti.style.borderRadius = '50%';
+                    }
+                    
+                    // Create falling animation
+                    const fallDuration = Math.random() * 2 + 2; // 2-4 seconds
+                    const rotation = Math.random() * 360;
+                    
+                    confetti.style.animation = `confetti-fall ${fallDuration}s linear forwards`;
+                    confetti.style.transform = `rotate(${rotation}deg)`;
+                    
+                    document.body.appendChild(confetti);
+                    
+                    // Remove after animation completes
+                    setTimeout(() => {
+                        if (confetti.parentNode) {
+                            confetti.remove();
+                        }
+                    }, fallDuration *1000 + 500);
+                }, i * 20); // Stagger creation more densely
+            }
+            
+            // Create a second wave of confetti after 1 second
+            setTimeout(() => {
+                for (let i = 0; i < 100; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.style.position = 'fixed';
+                        confetti.style.left = Math.random() * 100 + '%';
+                        confetti.style.top = '-20px';
+                        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.zIndex = '3000';
+                        confetti.style.pointerEvents = 'none';
+                        
+                        const size = Math.random() * 6 + 8;
+                        confetti.style.width = size + 'px';
+                        confetti.style.height = size + 'px';
+                        confetti.style.borderRadius = Math.random() > 0.5 ? '0' : '50%';
+                        
+                        const fallDuration = Math.random() * 1.5 + 2.5;
+                        const rotation = Math.random() * 360;
+                        
+                        confetti.style.animation = `confetti-fall ${fallDuration}s linear forwards`;
+                        confetti.style.transform = `rotate(${rotation}deg)`;
+                        
+                        document.body.appendChild(confetti);
+                        
+                        setTimeout(() => {
+                            if (confetti.parentNode) {
+                                confetti.remove();
+                            }
+                        }, fallDuration * 1000 + 500);
+                    }, i * 15);
+                }
+            }, 1000);
+        }
+
+        // Equipment interaction
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('labEquipment').addEventListener('click', function(e) {
+                const equipmentItem = e.target.closest('.equipment-item');
+                if (equipmentItem) {
+                    const challengeNumber = parseInt(equipmentItem.dataset.challenge);
+                    
+                    // Allow clicking on unlocked items OR completed items
+                    if (equipmentItem.classList.contains('unlocked') || 
+                        gameState.completedChallenges.includes(challengeNumber)) {
+                        showChallenge(challengeNumber);
+                    } else {
+                        showMessage('Dieses Gerät ist noch nicht freigeschaltet!');
+                    }
+                }
+            });
+        });
+
+        // Close hint overlay when clicking outside
+        document.getElementById('hintOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeHint();
+            }
+        });
+    </script>
+</body>
+</html>
